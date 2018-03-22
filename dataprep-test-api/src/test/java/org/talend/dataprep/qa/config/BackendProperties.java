@@ -24,6 +24,8 @@ public class BackendProperties {
 
     private API api = new API();
 
+    private Spark spark = new Spark();
+
     public static class User {
 
         private String login;
@@ -59,11 +61,39 @@ public class BackendProperties {
         }
     }
 
+    // TODO : nothing to do there, move this on EE part
+    public static class Spark {
+
+        private String hadoop;
+
+        private String sjs;
+
+        public String getHadoop() {
+            return hadoop;
+        }
+
+        public void setHadoop(String hadoop) {
+            this.hadoop = hadoop;
+        }
+
+        public String getSjs() {
+            return sjs;
+        }
+
+        public void setSjs(String sjs) {
+            this.sjs = sjs;
+        }
+    }
+
     public User getUser() {
         return user;
     }
 
     public API getApi() {
         return api;
+    }
+
+    public Spark getSpark() {
+        return spark;
     }
 }
