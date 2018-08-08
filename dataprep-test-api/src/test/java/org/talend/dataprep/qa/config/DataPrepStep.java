@@ -120,7 +120,9 @@ public abstract class DataPrepStep {
     protected Predicate<String> preparationDeletionIsNotOK() {
         return preparationId -> {
             try {
-                return api.deletePreparation(preparationId).getStatusCode() != OK.value();
+                int statusCode = api.deletePreparation(preparationId).getStatusCode();
+                LOGGER.debug("deletePreparation status code : " + statusCode);
+                return statusCode != OK.value();
             } catch (Exception ex) {
                 LOGGER.debug("Error on preparation's suppression {}.", preparationId);
                 return true;
@@ -132,7 +134,9 @@ public abstract class DataPrepStep {
         return datasetId -> {
             try {
                 // Even if the dataset doesn't exist, the status is 200
-                return api.deleteDataset(datasetId).getStatusCode() != OK.value();
+                int statusCode = api.deleteDataset(datasetId).getStatusCode();
+                LOGGER.debug("deleteDataset status code : " + statusCode);
+                return statusCode != OK.value();
             } catch (Exception ex) {
                 LOGGER.debug("Error on Dataset's suppression  {}.", datasetId);
                 return true;
