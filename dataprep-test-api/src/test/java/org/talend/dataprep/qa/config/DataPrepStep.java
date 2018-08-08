@@ -66,9 +66,9 @@ public abstract class DataPrepStep {
 
     protected static final String DATASET_ID_KEY = "dataSetId";
 
-    private static final int TIME_OUT = 20;
+    private static final int TIME_OUT = 100;
 
-    private static final int POLL_DELAY = 1;
+    private static final int POLL_DELAY = 10;
 
     private static final int POLL_INTERVAL = 1;
 
