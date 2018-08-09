@@ -66,9 +66,9 @@ public abstract class DataPrepStep {
 
     protected static final String DATASET_ID_KEY = "dataSetId";
 
-    private static final int TIME_OUT = 100;
+    private static final int TIME_OUT = 20;
 
-    private static final int POLL_DELAY = 10;
+    private static final int POLL_DELAY = 1;
 
     private static final int POLL_INTERVAL = 1;
 
@@ -121,7 +121,9 @@ public abstract class DataPrepStep {
         return preparationId -> {
             try {
                 int statusCode = api.deletePreparation(preparationId).getStatusCode();
-                LOGGER.debug("deletePreparation status code : " + statusCode);
+                if (statusCode != OK.value()) {
+                    LOGGER.debug("deletePreparation status code : " + statusCode);
+                }
                 return statusCode != OK.value();
             } catch (Exception ex) {
                 LOGGER.debug("Error on preparation's suppression {}.", preparationId);
@@ -135,7 +137,9 @@ public abstract class DataPrepStep {
             try {
                 // Even if the dataset doesn't exist, the status is 200
                 int statusCode = api.deleteDataset(datasetId).getStatusCode();
-                LOGGER.debug("deleteDataset status code : " + statusCode);
+                if (statusCode != OK.value()) {
+                    LOGGER.debug("deleteDataset status code : " + statusCode);
+                }
                 return statusCode != OK.value();
             } catch (Exception ex) {
                 LOGGER.debug("Error on Dataset's suppression  {}.", datasetId);
@@ -147,7 +151,11 @@ public abstract class DataPrepStep {
     protected Predicate<Folder> folderDeletionIsNotOK() {
         return folder -> {
             try {
-                return folderUtil.deleteFolder(folder).getStatusCode() != OK.value();
+                int statusCode = folderUtil.deleteFolder(folder).getStatusCode();
+                if (statusCode != OK.value()) {
+                    LOGGER.debug("deleteFolder status code : " + statusCode);
+                }
+                return statusCode != OK.value();
             } catch (Exception ex) {
                 LOGGER.debug("Error on folder's suppression  {}.", folder.getPath());
                 return true;
@@ -155,20 +163,19 @@ public abstract class DataPrepStep {
         };
     }
 
-    protected class CleanAfterException extends RuntimeException {
-
-        CleanAfterException(String s) {
-            super(s);
-        }
-    }
-
-    protected void checkColumnNames(String datasetOrPreparationName, List<String> expectedColumnNames, List<String> actual) {
-        assertNotNull(new StringBuilder("No columns in \"").append(datasetOrPreparationName).append("\".").toString(), actual);
+    protected void checkColumnNames(String datasetOrPreparationName, List<String> expectedColumnNames,
+            List<String> actual) {
+        assertNotNull(new StringBuilder("No columns in \"").append(datasetOrPreparationName).append("\".").toString(),
+                actual);
         assertFalse(new StringBuilder("No columns in \"").append(datasetOrPreparationName).append("\".").toString(),
                 actual.isEmpty());
-        assertEquals(new StringBuilder("Not the expected number of columns in \"").append(datasetOrPreparationName).append("\".")
+        assertEquals(new StringBuilder("Not the expected number of columns in \"")
+                .append(datasetOrPreparationName)
+                .append("\".")
                 .toString(), expectedColumnNames.size(), actual.size());
-        assertTrue(new StringBuilder("\"").append(datasetOrPreparationName).append("\" doesn't contain all expected columns.")
+        assertTrue(new StringBuilder("\"")
+                .append(datasetOrPreparationName)
+                .append("\" doesn't contain all expected columns.")
                 .toString(), actual.containsAll(expectedColumnNames));
     }
 
@@ -185,10 +192,19 @@ public abstract class DataPrepStep {
     }
 
     protected ConditionFactory waitResponse(String message, int timeOut, int pollDelay, int pollInterval) {
-        return with().pollInterval(pollInterval, TimeUnit.SECONDS).and() //
+        return with()
+                .pollInterval(pollInterval, TimeUnit.SECONDS)
+                .and() //
                 .with() //
                 .pollDelay(pollDelay, TimeUnit.SECONDS) //
                 .await(message) //
                 .atMost(timeOut, TimeUnit.SECONDS);
+    }
+
+    protected class CleanAfterException extends RuntimeException {
+
+        CleanAfterException(String s) {
+            super(s);
+        }
     }
 }
